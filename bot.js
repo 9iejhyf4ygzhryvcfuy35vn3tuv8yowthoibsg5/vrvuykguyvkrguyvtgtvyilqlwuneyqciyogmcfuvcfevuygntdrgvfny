@@ -6,48 +6,48 @@ const fetchVideoInfo = require('youtube-info');
 const YouTube = require('simple-youtube-api');
 const queue = new Map();
 const client = new Discord.Client();
-
+ 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     console.log(`in ${client.guilds.size} servers `)
     console.log(`[-] ${client.users.size}`)
     client.user.setStatus("idle")
 });
-
+ 
 const prefix = "9"
 client.on('message', async msg => {
     if (msg.author.bot) return undefined;
-
+ 
     if (!msg.content.startsWith(prefix)) return undefined;
     const args = msg.content.split(' ');
     const searchString = args.slice(1).join(' ');
-
+ 
     const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
     const serverQueue = queue.get(msg.guild.id);
-
+ 
     let command = msg.content.toLowerCase().split(" ")[0];
     command = command.slice(prefix.length)
-
+ 
     if (command === `play`) {
         const voiceChannel = msg.member.voiceChannel;
         if (!voiceChannel) return msg.channel.send('يجب توآجد حضرتك بروم صوتي .');
         const permissions = voiceChannel.permissionsFor(msg.client.user);
         if (!permissions.has('CONNECT')) {
-
+ 
             return msg.channel.send('لا يتوآجد لدي صلاحية للتكلم بهذآ الروم');
         }
         if (!permissions.has('SPEAK')) {
             return msg.channel.send('لا يتوآجد لدي صلاحية للتكلم بهذآ الروم');
         }
-
+ 
         if (!permissions.has('EMBED_LINKS')) {
             return msg.channel.sendMessage("**يجب توآفر برمشن `EMBED LINKS`لدي **")
         }
-
+ 
         if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
             const playlist = await youtube.getPlaylist(url);
             const videos = await playlist.getVideos();
-
+ 
             for (const video of Object.values(videos)) {
                 const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
                 await handleVideo(video2, msg, voiceChannel, true); // eslint-disable-line no-await-in-loop
@@ -55,7 +55,7 @@ client.on('message', async msg => {
             return msg.channel.send(` **${playlist.title}** تم الإضآفة إلى قأئمة التشغيل`);
         } else {
             try {
-
+ 
                 var video = await youtube.getVideo(url);
             } catch (error) {
                 try {
@@ -64,10 +64,10 @@ client.on('message', async msg => {
                     const embed1 = new Discord.RichEmbed()
                     .setDescription(`**الرجآء من حضرتك إختيآر رقم المقطع** :
 ${videos.map(video2 => `[**${++index} **] \`${video2.title}\``).join('\n')}`)
-
+ 
                     .setFooter("-")
                     msg.channel.sendEmbed(embed1).then(message =>{message.delete(20000)})
-
+ 
                     // eslint-disable-next-line max-depth
                     try {
                         var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
@@ -86,7 +86,7 @@ ${videos.map(video2 => `[**${++index} **] \`${video2.title}\``).join('\n')}`)
                     return msg.channel.send(':X: لا يتوفر نتآئج بحث ');
                 }
             }
-
+ 
             return handleVideo(video, msg, voiceChannel);
         }
     } else if (command === `skip`) {
@@ -105,7 +105,7 @@ ${videos.map(video2 => `[**${++index} **] \`${video2.title}\``).join('\n')}`)
         if (!serverQueue) return msg.channel.send('لا يوجد شيء شغآل.');
         if (!args[1]) return msg.channel.send(`:loud_sound: مستوى الصوت **${serverQueue.volume}**`);
         if (isNaN(args[1])) return msg.channel.send("Volume value must be a number");
-        if (args[1] > 150) return msg.channel.send(`ماتقدر تحط الصوت فوق 150 يا حمار`);
+        if (args[1] < 150) return msg.channel.send(`ماتقدر تحط الصوت فوق 150 يا حمار`);
         serverQueue.volume = args[1];
         serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 50);
         return msg.channel.send(`:speaker: تم تغير الصوت الي **${args[1]}**`);
@@ -115,12 +115,12 @@ ${videos.map(video2 => `[**${++index} **] \`${video2.title}\``).join('\n')}`)
     .setDescription(`:notes: الان يتم تشغيل : **${serverQueue.songs[0].title}**`)
         return msg.channel.sendEmbed(embedNP);
     } else if (command === `queue`) {
-
+ 
         if (!serverQueue) return msg.channel.send('لا يوجد شيء حالي ف العمل.');
         let index = 0;
-
+ 
         const embedqu = new Discord.RichEmbed()
-
+ 
 .setDescription(`**Songs Queue**
 ${serverQueue.songs.map(song => `**${++index} -** ${song.title}`).join('\n')}
 **الان يتم تشغيل** ${serverQueue.songs[0].title}`)
@@ -140,14 +140,14 @@ ${serverQueue.songs.map(song => `**${++index} -** ${song.title}`).join('\n')}
         }
         return msg.channel.send('لا يوجد شيء حالي في العمل.');
     }
-
+ 
     return undefined;
 });
-
+ 
 async function handleVideo(video, msg, voiceChannel, playlist = false) {
     const serverQueue = queue.get(msg.guild.id);
     console.log(video);
-
+ 
 //  console.log('yao: ' + Util.escapeMarkdown(video.thumbnailUrl));
     const song = {
         id: video.id,
@@ -164,9 +164,9 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
             playing: true
         };
         queue.set(msg.guild.id, queueConstruct);
-
+ 
         queueConstruct.songs.push(song);
-
+ 
         try {
             var connection = await voiceChannel.join();
             queueConstruct.connection = connection;
@@ -184,17 +184,17 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
     }
     return undefined;
 }
-
+ 
 function play(guild, song) {
     const serverQueue = queue.get(guild.id);
-
+ 
     if (!song) {
         serverQueue.voiceChannel.leave();
         queue.delete(guild.id);
         return;
     }
     console.log(serverQueue.songs);
-
+ 
     const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
         .on('end', reason => {
             if (reason === 'Stream is not generating quickly enough.') console.log('Song ended.');
@@ -204,16 +204,16 @@ function play(guild, song) {
         })
         .on('error', error => console.error(error));
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-
+ 
     serverQueue.textChannel.send(`بدء تشغيل : **${song.title}**`);
 }
-
+ 
 const adminprefix = "1";
 const devs = ['438041950021746689'];
 client.on('message', message => {
   var argresult = message.content.split(` `).slice(1).join(' ');
     if (!devs.includes(message.author.id)) return;
-
+ 
 if (message.content.startsWith(adminprefix + 'setgame')) {
   client.user.setGame(argresult);
     message.channel.sendMessage(`**${argresult} تم تغيير بلاينق البوت إلى **`)
@@ -231,9 +231,9 @@ if (message.content.startsWith(adminprefix + 'setT')) {
   client.user.setGame(argresult, "https://www.twitch.tv/idk");
     message.channel.sendMessage(`**تم تغيير تويتش البوت إلى  ${argresult}**`)
 }
-
+ 
 });
-
+ 
 client.on("message", message => {
  if (message.content === `${prefix}help`) {
   const embed = new Discord.RichEmbed()
@@ -247,11 +247,10 @@ ${prefix}vol ⇏ لتغيير درجة الصوت 100 - 0
 ${prefix}stop ⇏ لإخرآج البوت من الروم
 ${prefix}np ⇏ لمعرفة الأغنية المشغلة حآليا
 ${prefix}queue ⇏ لمعرفة قآئمة التشغيل
-
- `)
-   message.channel.sendEmbed(embed)
-
-   }
-});
+ 
+  `)
+  message.channel.send(embed);
+  }
+ });
 
 client.login(process.env.BOT_TOKEN);
