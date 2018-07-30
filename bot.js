@@ -252,5 +252,6 @@ ${prefix}queue ⇏ لمعرفة قآئمة التشغيل
    message.channel.sendEmbed(embed)
 
    }
+});
 
 client.login(process.env.BOT_TOKEN);
