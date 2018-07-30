@@ -1,8 +1,5 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const moment = require('moment');
-const eris = require('eris');
-const args = require('args');
 
 client.on('ready', () => {
   console.log('System Bot');
