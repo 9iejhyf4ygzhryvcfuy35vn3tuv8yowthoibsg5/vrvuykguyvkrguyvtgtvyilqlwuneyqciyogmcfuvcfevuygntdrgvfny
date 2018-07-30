@@ -119,39 +119,4 @@ message.member.addRole(message.guild.roles.find("name",`${args}`));
 }
 });
 
-    client.on('message', message => {
-    let subject = args.slice(0).join(" ");
-    if (!message.guild.roles.exists("name", "Tickets")) return message.channel.send(`Tickets`);
-    message.guild.createChannel(`ticket-1`, "text").then(c => {
-        let role = message.guild.roles.find("name", "Tickets");
-        let role2 = message.guild.roles.find("name", "@everyone");
-        c.overwritePermissions(role, {
-            SEND_MESSAGES: true,
-            READ_MESSAGES: true
-        }).catch(console.error);
-        c.overwritePermissions(role2, {
-            SEND_MESSAGES: false,
-            READ_MESSAGES: false
-        }).catch(console.error);
-        c.overwritePermissions(message.author, {
-            SEND_MESSAGES: true,
-            READ_MESSAGES: true
-        }).catch(console.error);
-        let done = new Discord.RichEmbed()
-            .setAuthor(message.author.tag)
-            .setColor(config.invis)
-        .setFooter(`${version}`)
-            .setDescription(`تم بنجاح فتح تذكرتك`)
-            .setTimestamp();
-        message.channel.send(done).then(m => m.delete(15000));
-        let embed = new Discord.RichEmbed()
-            .setColor(config.invis)
-        .setFooter(`${version}`)
-            .setAuthor(`${message.author.tag} `, message.author.avatarURL)
-            .setDescription(`الرجاء كتابة ماهي مشكلتك او سؤالك وسيتم الرد عليك في اقرب وقت ممكن. \n**موضوع التذكرة**: ${subject}`)
-            .setTimestamp();
-        c.send(embed)
-    }).catch(console.error);
-	});
-
 client.login(process.env.BOT_TOKEN);
