@@ -12,7 +12,7 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     console.log(`in ${client.guilds.size} servers `)
     console.log(`[-] ${client.users.size}`)
-    client.user.setStatus("idle")
+    client.user.setStatus("DND")
 });
  
 const prefix = "9"
@@ -106,7 +106,7 @@ ${videos.map(video2 => `[**${++index} **] \`${video2.title}\``).join('\n')}`)
         if (!serverQueue) return msg.channel.send('لا يوجد شيء شغآل.');
         if (!args[1]) return msg.channel.send(`:loud_sound: مستوى الصوت **${serverQueue.volume}**`);
         if (isNaN(args[1])) return msg.channel.send("Volume value must be a number");
-        if (args[1] > 100) return msg.channel.send(`ماتقدر تحط الصوت فوق 100 يا حمار`);
+        if (args[1] > 100) return msg.channel.send(`ماتقدر تحط الصوت فوق 100`);
         serverQueue.volume = args[1];
         serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 50);
         return msg.channel.send(`:speaker: تم تغير الصوت الي **${args[1]}**`);
